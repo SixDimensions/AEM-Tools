@@ -10,23 +10,22 @@ function usage {
 }
 function compact {
     if [ -f "oak_run_jars/oak-run-$1.jar" ];
+    	then
         echo "You did not supply a version found in oak_run_jars directory.\n Please download the appropriate version and place inside the oak_run_jars directory."
-
-    then
     fi
     if [ -d "$2" ];
     then
-    java -jar oak_run_jars/oak-run-$VERSION.jar backup "$DIR" $DIR_bak
+    #java -jar oak_run_jars/oak-run-$VERSION.jar backup "$DIR" $DIR_bak
     # check for non-needed checkpoints
     echo -e "Using oak-run-$VERSION.jar...\n"
-    echo -e "Checking for checkpoints at $DIR...\n"
-    java -jar oak_run_jars/oak-run-$VERSION.jar checkpoints "$DIR"
+    echo -e "Checking for checkpoints at $repoDir...\n"
+    java -jar oak_run_jars/oak-run-$version.jar checkpoints "$repoDir"
     # rm the checkpoints
-    echo -e "Removing unreferenced checkpoints at $DIR...\n"
-    java -jar oak_run_jars/oak-run-$VERSION.jar checkpoints "$DIR" rm-unreferenced
+    echo -e "Removing unreferenced checkpoints at $repoDir...\n"
+    java -jar oak_run_jars/oak-run-$version.jar checkpoints "$repoDir" rm-unreferenced
     #compact
-    echo -e "Compacting segmentstore at $DIR...\n"
-    java -jar oak_run_jars/oak-run-$VERSION.jar compact "$DIR"
+    echo -e "Compacting segmentstore at $repoDir...\n"
+    java -jar oak_run_jars/oak-run-$version.jar compact "$repoDir"
     echo -e "Done!\n"
     exit 0
     else 
