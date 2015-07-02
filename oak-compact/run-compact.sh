@@ -4,28 +4,43 @@ function usage {
   echo "Mandatory arguments to long options are mandatory for short options too."
   echo "-d       Path to repository to compact"
  echo "-v       The version of oak-compact.jar to use."
+ echo "-m       The mode of cleanup, this can currently be rm-unreferenced or rm-all"
+ echo "-b       Set to true to backup the repository before compacting, backup will occur in same directory as repo."
   echo -e "-H       displays this help and then exits"\\n
-  echo -e "Example: run-compact.sh -d /opt/aem/crx-quickstart/repository/segmentstore -v 1.0.8"
+  echo -e "Example: run-compact.sh -d /opt/aem/crx-quickstart/repository/segmentstore -v 1.0.8 -m rm-all"
   exit 
 }
 function compact {
     if [ -f "oak_run_jars/oak-run-$1.jar" ];
     	then
         echo "You did not supply a version found in oak_run_jars directory.\n Please download the appropriate version and place inside the oak_run_jars directory."
+      else
+        version="$1"
     fi
     if [ -d "$2" ];
     then
-    #java -jar oak_run_jars/oak-run-$VERSION.jar backup "$DIR" $DIR_bak
+      repoDir="$2"
+      if [ -z "$3"];
+        then
+          #they didn't supply a mode, run rm-unreferenced
+          MODE='rm-unreferenced'
+        else
+          MODE="$3"
+      fi
+    if [ -n "$4" && "$4" == 'true']; 
+      then
+        java -jar oak_run_jars/oak-run-$VERSION.jar backup "${repoDir}" ${repoDir}_bak
+    fi
     # check for non-needed checkpoints
     echo -e "Using oak-run-$VERSION.jar...\n"
     echo -e "Checking for checkpoints at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-$version.jar checkpoints "$repoDir"
+    java -jar oak_run_jars/oak-run-${version}.jar checkpoints "${repoDir}"
     # rm the checkpoints
     echo -e "Removing unreferenced checkpoints at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-$version.jar checkpoints "$repoDir" rm-unreferenced
+    java -jar oak_run_jars/oak-run-${version}.jar checkpoints "${repoDir}" ${MODE}
     #compact
     echo -e "Compacting segmentstore at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-$version.jar compact "$repoDir"
+    java -jar oak_run_jars/oak-run-${version}.jar compact "${repoDir}"
     echo -e "Done!\n"
     exit 0
     else 
@@ -37,7 +52,7 @@ function compact {
 function init {
   #logDate=`date +"%h %d %Y %r"`
   echo -e "${logDate} [INFO] Starting offline oak compaction..." >> $logFile
-  while getopts ":d:H:v:" arg; do
+  while getopts ":d:H:v:m:b:" arg; do
     case "${arg}" in
       d)
           repoDir=$OPTARG
@@ -47,7 +62,13 @@ function init {
           ;;
       v)
           version=$OPTARG
-          ;;    
+          ;;
+      m)
+          mode=$OPTARG
+          ;;
+      b)
+          backup=$OPTARG
+          ;;      
      *)
          usage
         ;;
@@ -59,9 +80,9 @@ function init {
     usage
   fi
   echo -e "${logDate} [INFO] Compacting ${repoDir} with jar version ${version}..." >> $logFile
- # fetch what is on remote server, compress it to make it faster.
- compact $version $repoDir
- # sync it with the local resources directory
+ 
+ compact $version $repoDir $mode $backup
+ 
  exit 0
 }
 init $@ #call to init function
