@@ -3,8 +3,7 @@ This tool makes it easier to filter out log messages in the error.log for just m
 ## Use
 You can use the file standalone in the logs directory by performing a chmod +x on the file, then running the file as so:
 
-```bash
-./sightlyLogFilter.sh myUseClass.js```
+`./sightlyLogFilter.sh myUseClass.js`
 
 Optionally you could alias this and just call the command.
 
