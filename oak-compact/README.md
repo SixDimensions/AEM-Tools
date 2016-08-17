@@ -10,4 +10,6 @@ Using the above command this will compact the repository at `/opt/aem/crx-quicks
 It is up to you to supply the correct oak-run.jar version for the version of the repository you are using. The jar should be dropped into the `oak_run_jars` folder.
 
 Likewise you could alias this and use just the command itself, likely useful if you have multiple AEM instances.
+
+
 This tool is covered by the LICENSE file at the root of this repository.
