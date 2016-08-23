@@ -20,19 +20,19 @@ function compact {
     if [ -d "$2" ];
     then
       repoDir="$2"
-      if [ -z "$3"];
+      if [ -z "$3" ];
         then
           #they didn't supply a mode, run rm-unreferenced
           MODE='rm-unreferenced'
         else
           MODE="$3"
       fi
-    if [ -n "$4" && "$4" == 'true']; 
+    if [ -n "$4" && "$4" == 'true' ]; 
       then
         java -jar oak_run_jars/oak-run-$VERSION.jar backup "${repoDir}" ${repoDir}_bak
     fi
     # check for non-needed checkpoints
-    echo -e "Using oak-run-$VERSION.jar...\n"
+    echo -e "Using oak-run-${VERSION}.jar...\n"
     echo -e "Checking for checkpoints at $repoDir...\n"
     java -jar oak_run_jars/oak-run-${version}.jar checkpoints "${repoDir}"
     # rm the checkpoints
@@ -51,7 +51,7 @@ function compact {
 # function that gets called to getopts and check them.
 function init {
   #logDate=`date +"%h %d %Y %r"`
-  echo -e "${logDate} [INFO] Starting offline oak compaction..." >> $logFile
+  echo -e "${logDate} [INFO] Starting offline oak compaction..."
   while getopts ":d:H:v:m:b:" arg; do
     case "${arg}" in
       d)
@@ -79,7 +79,7 @@ function init {
     echo "It appears you did not specify all required arguments!"
     usage
   fi
-  echo -e "${logDate} [INFO] Compacting ${repoDir} with jar version ${version}..." >> $logFile
+  echo -e "${logDate} [INFO] Compacting ${repoDir} with jar version ${version}..." 
  
  compact $version $repoDir $mode $backup
  
