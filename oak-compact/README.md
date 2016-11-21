@@ -12,4 +12,7 @@ It is up to you to supply the correct oak-run.jar version for the version of the
 Likewise you could alias this and use just the command itself, likely useful if you have multiple AEM instances.
 
 
+You can find the appropriate oak-run jar at: https://mvnrepository.com/artifact/org.apache.jackrabbit/oak-run
+
+
 This tool is covered by the LICENSE file at the root of this repository.
