@@ -11,46 +11,48 @@ function usage {
   exit 
 }
 function compact {
-    if [ -f "oak_run_jars/oak-run-$1.jar" ];
+    if [ ! -f oak_run_jars/oak-run-${1}.jar ];
     	then
-        echo "You did not supply a version found in oak_run_jars directory.\n Please download the appropriate version and place inside the oak_run_jars directory."
-      else
-        version="$1"
-    fi
-    if [ -d "$2" ];
-    then
-      repoDir="$2"
-      if [ -z "$3" ];
-        then
-          #they didn't supply a mode, run rm-unreferenced
-          MODE='rm-unreferenced'
-        else
-          MODE="$3"
-      fi
-    if [ -n "$4" && "$4" == 'true' ]; 
+	  	 echo "Could not find valid oak run jar in the oak_run_jars directory."
+       exit 1
+    fi   
+    if [ ! -d "$2" ];
       then
-        java -jar oak_run_jars/oak-run-$VERSION.jar backup "${repoDir}" ${repoDir}_bak
-    fi
-    # check for non-needed checkpoints
-    echo -e "Using oak-run-${VERSION}.jar...\n"
-    echo -e "Checking for checkpoints at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-${version}.jar checkpoints "${repoDir}"
-    # rm the checkpoints
-    echo -e "Removing unreferenced checkpoints at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-${version}.jar checkpoints "${repoDir}" ${MODE}
-    #compact
-    echo -e "Compacting segmentstore at $repoDir...\n"
-    java -jar oak_run_jars/oak-run-${version}.jar compact "${repoDir}"
-    echo -e "Done!\n"
-    exit 0
-    else 
-        echo "You did not supply a valid directory...exiting..."
+        echo "Could not find directory for the repository."
         exit 1
-    fi
+      fi  
+      if [ -z "$3" ];
+          then
+            #they didn't supply a mode, run rm-unreferenced
+            MODE='rm-unreferenced'
+          else
+            MODE="$3"
+      fi
+      if [ -n "$4" ];
+        then
+        if [ "$4" = 'true' ]; 
+          then
+            java -jar oak_run_jars/oak-run-$VERSION.jar backup "${repoDir}" ${repoDir}_bak
+        fi  
+      fi
+      VERSION=$1
+      repoDir=$2      
+      # check for non-needed checkpoints
+      echo -e "Using oak-run-${VERSION}.jar...\n"
+      echo -e "Checking for checkpoints at $repoDir...\n"
+      java -jar oak_run_jars/oak-run-${VERSION}.jar checkpoints "${repoDir}"
+      # rm the checkpoints
+      echo -e "Removing unreferenced checkpoints at $repoDir...\n"
+      java -jar oak_run_jars/oak-run-${VERSION}.jar checkpoints "${repoDir}" ${MODE}
+      #compact
+      echo -e "Compacting segmentstore at $repoDir...\n"
+      java -jar oak_run_jars/oak-run-${VERSION}.jar compact "${repoDir}"
+      echo -e "Done!\n"
+      exit 0
 }
 # function that gets called to getopts and check them.
 function init {
-  #logDate=`date +"%h %d %Y %r"`
+  logDate=`date +"%h %d %Y %r"`
   echo -e "${logDate} [INFO] Starting offline oak compaction..."
   while getopts ":d:H:v:m:b:" arg; do
     case "${arg}" in
