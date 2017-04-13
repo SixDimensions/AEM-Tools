@@ -8,27 +8,60 @@ function usage {
   echo "-b       Set to true to backup the repository before compacting, backup will occur in same directory as repo."
   echo "-j       Specify additional JVM options for oak run jar (such as memory requirements)"
   echo "-p       Specify the crx-quickstart location for locating the pid file."
+  echo "-i       Instance Type, can be publish to use configured start/stop scripts for a publish instance (must configure)"
   echo -e "-H       displays this help and then exits"\\n
   echo -e "Example: run-compact.sh -d /opt/aem/crx-quickstart/repository/segmentstore -v 1.0.8 -m rm-all"
   exit
 }
-# configurations
-START='/etc/init.d/cq-publish start'
-STOP='/etc/init.d/cq-publish stop'
-OAK_JARS_LOCATION="/local/cq"
-COMPACTION_USER="cq"
-#START="service aem-author-6-2 start"
-#STOP="service aem-author-6-2 stop"
+# script configurations
+##the start and stop need to be configured for the modes you plan to run this with (-i).
+START='/etc/init.d/aem-author start'
+STOP='/etc/init.d/aem-author stop'
+ITYPE='' #blank for author, this is for internal error reporting.
+OAK_JARS_LOCATION="/home/aem"
+COMPACTION_USER="aem"
 SLEEPTIME='120s'
+TIMEOUT=5
+# email notification configuration
+HOST=""
+TO="myemail@email.com"
 
-
+#functions
+function sendAlertEmail {
+  echo "Subject: Offline Compaction failed on ${HOST}\nOffline compaction failed on ${HOST} for reason: ${1}\n" | /usr/sbin/sendmail ${TO}
+}
+function validateAEMStart {
+    COUNT=1
+    PID=`cat $1/conf/cq.pid`
+    echo `date +"%h %d %Y %r"`" [INFO] Attempting to start AEM with PID of $PID"
+    while [ -z "`ps aux | grep 'java' | head -n -1 | grep ${PID}`" ]; do
+      if [ ${COUNT} -ge ${TIMEOUT} ]; then
+        echo `date +"%h %d %Y %r"`" [WARN] Instance failed to start, could not find PID of ${PID}."
+        REASON="${ITYPE}Instance failed to start, could not find PID of ${PID}."
+        #sendAlertEmail ${REASON}
+        exit 1
+      fi
+      echo `date +"%h %d %Y %r"`" [INFO] Instance not started completely, sleeping for $SLEEPTIME, check number ${COUNT}"
+      sleep ${SLEEPTIME}
+      ((COUNT++))
+    done
+    echo `date +"%h %d %Y %r"`" [INFO] Instance appears to have started, found PID of ${PID}."
+}
 function stopAEM {
+  COUNT=1
   PID=`cat $1/conf/cq.pid`
   echo `date +"%h %d %Y %r"`" [INFO] Attempting to stop AEM with PID of $PID"
   $STOP
-  while [ -n "`ps aux | grep 'java' | head -1 | grep ${PID}`" ]; do
-    echo `date +"%h %d %Y %r"`" [INFO] Instance not stopped completely, sleeping for $SLEEPTIME"
-    sleep $SLEEPTIME
+  while [ -n "`ps aux | grep 'java' | head -n -1 | grep ${PID}`" ]; do
+    if [ ${COUNT} -ge ${TIMEOUT} ]; then
+      echo `date +"%h %d %Y %r"`" [WARN] Instance failed to stop...aborting compaction."
+      REASON="${ITYPE}Instance failed to stop after trying ${COUNT} times and waiting ${SLEEPTIME} each time."
+      #sendAlertEmail ${REASON}
+      exit 1
+    fi
+    echo `date +"%h %d %Y %r"`" [INFO] Instance not stopped completely, sleeping for $SLEEPTIME, check number ${COUNT}"
+    sleep ${SLEEPTIME}
+    ((COUNT++))
   done
 }
 function compact {
@@ -82,13 +115,14 @@ function compact {
         then
          echo "Starting AEM..."
          $START
+         validateAEMStart $pidFile
       fi
       exit 0
 }
 # function that gets called to getopts and check them.
 function init {
   echo -e `date +"%h %d %Y %r"`" [INFO] Starting offline oak compaction..."
-  while getopts ":d:H:v:m:b:p:j:" arg; do
+  while getopts ":d:H:v:m:b:p:j:i:" arg; do
     case "${arg}" in
       d)
           repoDir=$OPTARG
@@ -111,6 +145,9 @@ function init {
       j)
           javaOpts=$OPTARG
           ;;
+      i)
+          instance=$OPTARG
+          ;;
      *)
          usage
         ;;
@@ -122,8 +159,12 @@ function init {
     usage
   fi
   echo -e `date +"%h %d %Y %r"`" [INFO] Compacting ${repoDir} with jar version ${version}..."
-
- compact $version $repoDir $mode $backup $javaOpts
+  if [ "${instance}" == "publish" ]; then
+    ITYPE='Publish '
+    START='/etc/init.d/aem-publish start'
+    STOP='/etc/init.d/aem-publish stop'
+  fi
+  compact $version $repoDir $mode $backup $javaOpts
 
  exit 0
 }

@@ -1,0 +1,4 @@
+/content/we-retail
+/content/geometrixx-gov/en/jcr:content
+/content/geometrixx-gov/en/thankyou
+/content/geometrixx-gov/en/health
