@@ -1,6 +1,6 @@
 #!/bin/bash
 # creates packages, and adds filters based on a text file.
-
+# see https://github.com/SixDimensions/AEM-Tools/tree/master/packbuldr
 #config
 HOST=""
 # only configure if you plan to migrate content between two instances.
