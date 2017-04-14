@@ -55,7 +55,10 @@ function downloadPackage {
 }
 function uploadPackage {
   echo -e "\n"
-  curl -u ${USER}:${PASS} -F file=@"${PACKAGE_NAME}.zip" -F name="${PACKAGE_NAME}" -F force=true -F install=true ${TARGET_HOST}/crx/packmgr/service.jsp
+  for HOST in $TARGET_HOST
+  do
+      curl -u ${USER}:${PASS} -F file=@"${PACKAGE_NAME}.zip" -F name="${PACKAGE_NAME}" -F force=true -F install=true ${HOST}/crx/packmgr/service.jsp
+  done
 }
 while getopts ":p:n:f:m:h:t:H:" arg; do
     case "${arg}" in
