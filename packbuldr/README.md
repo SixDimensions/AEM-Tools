@@ -3,7 +3,7 @@ This tool makes it easier to build packages that may have multiple filters. This
 ## Use
 You can use the file standalone by performing a chmod +x on the file, then running the file as so:
 
-`./packbuldr.sh -p myuserpassword -n my_new_package -h http://localhost:4502 -t http://localhost:5502 -f myNewFilters.txt`
+`./packbuldr.sh -p myuserpassword -n my_new_package -h http://localhost:4502 -t "http://localhost:5502 http://localhost:5503" -f myNewFilters.txt`
 
 There is some additional configuration that you need to configure within the script itself. Namely:
 * User

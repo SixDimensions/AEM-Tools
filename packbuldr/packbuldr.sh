@@ -18,7 +18,7 @@ function usage {
   echo "-t       If set to a host string such as http://localhost:4502, it will upload and install package on that host."
   echo "-h       Use to specify host name of machine to build package from."
   echo -e "-H       displays this help and then exits"\\n
-  echo -e "Example: packbuldr.sh -p myuserpassword -n my_new_package -h http://localhost:4502"
+  echo -e "Example: ./packbuldr.sh -p myuserpassword -n my_new_package -h http://localhost:4502 -t 'http://localhost:5502 http://localhost:5503' -f myNewFilters.txt"
   exit
 }
 
@@ -34,12 +34,14 @@ function addPackageFilters {
   ROOTPATH=
   while IFS= read -r LINE
   do
+    if [ ${LINE} != "#"* ]; then
           path='{"root":"'${LINE}'","rules":[]}'
           if [ -z "${ROOTPATH}" ]; then
             ROOTPATH=${path}
           else
             ROOTPATH=${ROOTPATH},${path}
           fi
+    fi
   done < "${FILTERS}"
   curl -u ${USER}:${PASS} -X POST ${HOST}/crx/packmgr/update.jsp -F path=/etc/packages/${GROUP_NAME}/${PACKAGE_NAME}.zip -F packageName=${PACKAGE_NAME} -F groupName=${GROUP_NAME} -F 'filter=['$ROOTPATH']' -F '_charset_=UTF-8'
 }
