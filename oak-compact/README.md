@@ -1,5 +1,5 @@
 # Oak Compact Helper
-This tool automates offline Oak Compaction run against AEM repositiories. This script automates the check of checkpoints, removal, and compaction of an Oak repository. 
+This tool automates offline Oak Compaction run against AEM repositiories. This script automates the check of checkpoints, removal, and compaction of an Oak repository.
 ## Use
 You can use the file standalone in the repository directory by performing a chmod +x on the file, then running the file as so:
 
@@ -11,6 +11,10 @@ It is up to you to supply the correct oak-run.jar version for the version of the
 
 Likewise you could alias this and use just the command itself, likely useful if you have multiple AEM instances.
 
+There are many options that can be passed into the run-compact script:
+* ```-j``` = Specify the JVM Parameters for compaction
+* ```-p``` = The pid file - use if you want run-compact to shutdown and start your AEM instances before and after compaction for you.
+* ```-i``` = instance type, in case you are compacting both an author and publish on the same system, this flag allows the script to switch between the proper start/stop commands.
 
 You can find the appropriate oak-run jar at: https://mvnrepository.com/artifact/org.apache.jackrabbit/oak-run
 
