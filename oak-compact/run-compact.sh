@@ -34,11 +34,11 @@ function validateAEMStart {
     COUNT=1
     PID=`cat $1/conf/cq.pid`
     echo `date +"%h %d %Y %r"`" [INFO] Attempting to start AEM with PID of $PID"
-    while [ -z "`ps aux | grep 'java' | head -n -1 | grep ${PID}`" ]; do
+    while [ -z "`ps aux | grep 'java' | grep ${PID}`" ]; do
       if [ ${COUNT} -ge ${TIMEOUT} ]; then
         echo `date +"%h %d %Y %r"`" [WARN] Instance failed to start, could not find PID of ${PID}."
         REASON="${ITYPE}Instance failed to start, could not find PID of ${PID}."
-        #sendAlertEmail ${REASON}
+        #sendAlertEmail "${REASON}"
         exit 1
       fi
       echo `date +"%h %d %Y %r"`" [INFO] Instance not started completely, sleeping for $SLEEPTIME, check number ${COUNT}"
@@ -51,12 +51,12 @@ function stopAEM {
   COUNT=1
   PID=`cat $1/conf/cq.pid`
   echo `date +"%h %d %Y %r"`" [INFO] Attempting to stop AEM with PID of $PID"
-  $STOP
+  $STOP >> compact-startup.out 2>&1
   while [ -n "`ps aux | grep 'java' | head -n -1 | grep ${PID}`" ]; do
     if [ ${COUNT} -ge ${TIMEOUT} ]; then
       echo `date +"%h %d %Y %r"`" [WARN] Instance failed to stop...aborting compaction."
       REASON="${ITYPE}Instance failed to stop after trying ${COUNT} times and waiting ${SLEEPTIME} each time."
-      #sendAlertEmail ${REASON}
+      #sendAlertEmail "${REASON}"
       exit 1
     fi
     echo `date +"%h %d %Y %r"`" [INFO] Instance not stopped completely, sleeping for $SLEEPTIME, check number ${COUNT}"
@@ -88,7 +88,7 @@ function compact {
         then
         if [ "$4" = 'true' ];
           then
-            java ${javaOpts} -jar ${OAK_JARS_LOCATION}/oak_run_jars/oak-run-$VERSION.jar backup "${repoDir}" ${repoDir}_bak
+            su -c "java ${javaOpts} -jar ${OAK_JARS_LOCATION}/oak_run_jars/oak-run-$VERSION.jar backup ${repoDir} ${repoDir}_bak" - ${COMPACTION_USER}
         fi
       fi
       if [ -n "$pidFile" ];
@@ -114,7 +114,7 @@ function compact {
       if [ -n "$pidFile" ];
         then
          echo "Starting AEM..."
-         $START
+         $START >> compact-startup.out 2>&1
          validateAEMStart $pidFile
       fi
       exit 0
@@ -143,7 +143,7 @@ function init {
           pidFile=$OPTARG
           ;;
       j)
-          javaOpts=$OPTARG
+          javaOpts="$OPTARG"
           ;;
       i)
           instance=$OPTARG
@@ -164,8 +164,8 @@ function init {
     START='/etc/init.d/aem-publish start'
     STOP='/etc/init.d/aem-publish stop'
   fi
-  compact $version $repoDir $mode $backup $javaOpts
+  compact $version $repoDir $mode $backup "$javaOpts"
 
  exit 0
 }
-init $@ #call to init function
+init "$@" #call to init function
