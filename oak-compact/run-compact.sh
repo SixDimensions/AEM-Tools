@@ -96,10 +96,8 @@ function compact {
         then
           stopAEM
       fi
-      repoDir=$2
+
       echo "Switching user to ${COMPACTION_USER}"
-      echo "${javaOpts}"
-      echo "${MODE}"
       echo "java ${javaOpts} -jar ${OAK_JARS_LOCATION}/oak_run_jars/oak-run-${VERSION}.jar compact "${REPO_DIR}""
       # check for non-needed checkpoints
       echo -e `date +"%h %d %Y %r"`" [INFO] Using oak-run-${VERSION}.jar...\n"
