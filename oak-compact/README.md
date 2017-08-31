@@ -16,6 +16,24 @@ There are many options that can be passed into the run-compact script:
 * ```-p``` = The pid file - use if you want run-compact to shutdown and start your AEM instances before and after compaction for you.
 * ```-i``` = instance type, in case you are compacting both an author and publish on the same system, this flag allows the script to switch between the proper start/stop commands.
 
+There are a few configurable parameters within oak-compact.sh itself
+
+# script configurations
+## the start and stop need to be configured for the modes you plan to run this with (-i).
+START='/etc/init.d/aem-author start'
+STOP='/etc/init.d/aem-author stop'
+ITYPE='' #blank for author, this is for internal error reporting.
+OAK_JARS_LOCATION="/opt/oak-compact"
+COMPACTION_USER="cq"
+SLEEPTIME='20s'
+TIMEOUT=5
+# email notification configuration
+HOST="HOSTNAME"
+TO="youremail@email.com"
+
+
+If you specify the PID file, the script expects to stop and start the instance...
+
 You can find the appropriate oak-run jar at: https://mvnrepository.com/artifact/org.apache.jackrabbit/oak-run
 
 
