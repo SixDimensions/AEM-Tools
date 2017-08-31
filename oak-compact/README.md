@@ -23,14 +23,23 @@ There are a few configurable parameters within oak-compact.sh itself
 The start and stop need to be configured for the modes you plan to run this with (-i).
 
 START='/etc/init.d/aem-author start'
+
 STOP='/etc/init.d/aem-author stop'
+
 ITYPE='' #blank for author, this is for internal error reporting.
+
 OAK_JARS_LOCATION="/opt/oak-compact"
+
 COMPACTION_USER="cq"
+
 SLEEPTIME='20s'
+
 TIMEOUT=5
+
 # email notification configuration
+
 HOST="HOSTNAME"
+
 TO="youremail@email.com"
 
 
