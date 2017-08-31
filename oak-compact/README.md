@@ -19,7 +19,9 @@ There are many options that can be passed into the run-compact script:
 There are a few configurable parameters within oak-compact.sh itself
 
 # script configurations
+
 The start and stop need to be configured for the modes you plan to run this with (-i).
+
 START='/etc/init.d/aem-author start'
 STOP='/etc/init.d/aem-author stop'
 ITYPE='' #blank for author, this is for internal error reporting.
